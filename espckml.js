@@ -1,8 +1,13 @@
 // "Compile" with http://chris.zarate.org/bookmarkleter
 function enhanceMap(map) {
 	var kmlUrl = 'https://maps.google.com/maps/ms?msa=0&output=kml&msid=217694540754022493585.0004d551e620a2b06ec95';
-	var kmlLayer = new google.maps.KmlLayer(kmlUrl);
-	kmlLayer.setMap(map);
+	var kmlLayer = new google.maps.KmlLayer({
+		clickable: false,
+		map: map,
+		preserveViewport: true,
+		suppressInfoWindows: true,
+		url: kmlUrl,
+	});
 	window.map = map;
 }
 
