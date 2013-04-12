@@ -20,7 +20,7 @@ else if (typeof drawMapDetails == 'function') {
 	// Properties Details Page Map
 	// e.g. http://www.espc.com/properties/details.aspx?pid=123456
 	$('a[href=#map]').click();
-	$('#gmap').height(800).width(800);
+	$('#map, #gmap').height(800).width(800);
 	setTimeout(function() {
 		var mapId = 'gmap';
 		var mapElement = document.getElementById(mapId);
