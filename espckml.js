@@ -11,6 +11,30 @@ function enhanceMap(map) {
 	window.map = map;
 }
 
+function showDistanceMatrixTable(response, status) {
+	if (status != google.maps.DistanceMatrixStatus.OK)
+		return false;
+
+	div = $('#matrixDiv');
+	div.html('');
+
+	table = $('<table/>').appendTo(div);
+
+	headerRow = $('<tr/>').appendTo(table);
+	for (var i = 0; i < response.destinationAddresses.length; i++) {
+		$('<th>' + response.destinationAddresses[i] + '</th>').appendTo(headerRow);
+	}
+
+	for (var i = 0; i < response.rows.length; i++) {
+		tableRow = $('<tr/>').appendTo(table);
+		for (var j = 0; j < response.rows[i].elements.length; j++) {
+			var distance = response.rows[i].elements[j].distance.text;
+			var duration = response.rows[i].elements[j].duration.text;
+			$('<td>' + distance + '<br>' + duration + '</td>').appendTo(tableRow);
+		}
+	}
+}
+
 if (typeof espcGoogleMap == 'object') {
 	// Properties Search Page Map View
 	// e.g. http://www.espc.com/properties.aspx?view=map
@@ -21,6 +45,8 @@ else if (typeof drawMapDetails == 'function') {
 	// e.g. http://www.espc.com/properties/details.aspx?pid=123456
 	$('a[href=#map]').click();
 	$('#map, #gmap').height(800).width(800);
+	$('#map').height(1000);
+	$('#map').append('<div id="matrixDiv"/>');
 	setTimeout(function() {
 		var mapId = 'gmap';
 		var mapElement = document.getElementById(mapId);
@@ -30,6 +56,19 @@ else if (typeof drawMapDetails == 'function') {
 		var title = attributes.slice(2).join(', ');
 		map = drawMapDetails(mapElement, null, latitude, longitude, title);
 		enhanceMap(map);
+		var houseLocation = new google.maps.LatLng(latitude, longitude);
+		var distanceMatrixService = new google.maps.DistanceMatrixService();
+		distanceMatrixService.getDistanceMatrix({
+			origins: [houseLocation],
+			destinations: [
+				"St Paul's and St George's Church, Edinburgh",
+				"Princes Street, Edinburgh",
+				"Royal Infirmary of Edinburgh",
+				"Tollcross Health Centre, Edinburgh"
+			],
+			travelMode: google.maps.TravelMode.BICYCLING,
+			unitSystem: google.maps.UnitSystem.IMPERIAL,
+		}, showDistanceMatrixTable);
 	}, 1000);
 }
 else {
