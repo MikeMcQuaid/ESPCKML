@@ -1,4 +1,6 @@
 // "Compile" with http://chris.zarate.org/bookmarkleter
+var rowCount = 0;
+
 function enhanceMap(map) {
 	var kmlUrl = 'https://maps.google.com/maps/ms?msa=0&output=kml&msid=217694540754022493585.0004d551e620a2b06ec95';
 	var kmlLayer = new google.maps.KmlLayer({
@@ -16,6 +18,7 @@ function createDistanceMatrixTable(destinations) {
 	div.html('');
 
 	table = $('<table/>').appendTo(div);
+	rowCount = 0;
 
 	headerRow = $('<tr/>').appendTo(table);
 	$('<th/>').appendTo(headerRow);
@@ -30,12 +33,21 @@ function getDistanceMatrixCallBack(type, table) {
 		if (status != google.maps.DistanceMatrixStatus.OK)
 			return false;
 
+		if (rowCount == 0) {
+			rowCount++;
+			tableRow = $('<tr/>').appendTo(table);
+			$('<th>' + 'Distance' + '</th>').appendTo(tableRow);
+
+			response.rows[0].elements.forEach(function(element) {
+				$('<td>' + element.distance.text + '</td>').appendTo(tableRow);
+			});
+		}
+
 		tableRow = $('<tr/>').appendTo(table);
 		$('<th>' + type + '</th>').appendTo(tableRow);
 
 		response.rows[0].elements.forEach(function(element) {
-			$('<td>' + element.distance.text + '<br>'
-			         + element.duration.text + '</td>').appendTo(tableRow);
+			$('<td>' + element.duration.text + '</td>').appendTo(tableRow);
 		});
 	}
 }
