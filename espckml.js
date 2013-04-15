@@ -11,27 +11,32 @@ function enhanceMap(map) {
 	window.map = map;
 }
 
-function showDistanceMatrixTable(response, status) {
-	if (status != google.maps.DistanceMatrixStatus.OK)
-		return false;
-
+function createDistanceMatrixTable(destinations) {
 	div = $('#matrixDiv');
 	div.html('');
 
 	table = $('<table/>').appendTo(div);
 
 	headerRow = $('<tr/>').appendTo(table);
-	for (var i = 0; i < response.destinationAddresses.length; i++) {
-		$('<th>' + response.destinationAddresses[i] + '</th>').appendTo(headerRow);
-	}
+	$('<th/>').appendTo(headerRow);
+	destinations.forEach(function(destination) {
+		$('<th>' + destination + '</th>').appendTo(headerRow);
+	});
+	return table;
+}
 
-	for (var i = 0; i < response.rows.length; i++) {
+function getDistanceMatrixCallBack(type, table) {
+	return function(response, status) {
+		if (status != google.maps.DistanceMatrixStatus.OK)
+			return false;
+
 		tableRow = $('<tr/>').appendTo(table);
-		for (var j = 0; j < response.rows[i].elements.length; j++) {
-			var distance = response.rows[i].elements[j].distance.text;
-			var duration = response.rows[i].elements[j].duration.text;
-			$('<td>' + distance + '<br>' + duration + '</td>').appendTo(tableRow);
-		}
+		$('<th>' + type + '</th>').appendTo(tableRow);
+
+		response.rows[0].elements.forEach(function(element) {
+			$('<td>' + element.distance.text + '<br>'
+			         + element.duration.text + '</td>').appendTo(tableRow);
+		});
 	}
 }
 
@@ -58,17 +63,26 @@ else if (typeof drawMapDetails == 'function') {
 		enhanceMap(map);
 		var houseLocation = new google.maps.LatLng(latitude, longitude);
 		var distanceMatrixService = new google.maps.DistanceMatrixService();
-		distanceMatrixService.getDistanceMatrix({
+		var destinations = [
+			"St Paul's and St George's Church, Edinburgh",
+			"Princes Street, Edinburgh",
+			"Royal Infirmary of Edinburgh",
+			"Tollcross Health Centre, Edinburgh"
+		];
+
+		var table = createDistanceMatrixTable(destinations);
+
+		var distanceMatrixCarOptions = {
 			origins: [houseLocation],
-			destinations: [
-				"St Paul's and St George's Church, Edinburgh",
-				"Princes Street, Edinburgh",
-				"Royal Infirmary of Edinburgh",
-				"Tollcross Health Centre, Edinburgh"
-			],
-			travelMode: google.maps.TravelMode.BICYCLING,
+			destinations: destinations,
 			unitSystem: google.maps.UnitSystem.IMPERIAL,
-		}, showDistanceMatrixTable);
+			travelMode: google.maps.TravelMode.DRIVING,
+		};
+		distanceMatrixService.getDistanceMatrix(distanceMatrixCarOptions, getDistanceMatrixCallBack('Car', table));
+
+		var distanceMatrixBikeOptions = jQuery.extend({}, distanceMatrixCarOptions);
+		distanceMatrixBikeOptions.travelMode = google.maps.TravelMode.BICYCLING;
+		distanceMatrixService.getDistanceMatrix(distanceMatrixBikeOptions, getDistanceMatrixCallBack('Bike', table));
 	}, 1000);
 }
 else {
