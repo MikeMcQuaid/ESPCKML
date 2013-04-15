@@ -43,12 +43,30 @@ function getDistanceMatrixCallBack(type, table) {
 			});
 		}
 
+		rowCount++;
 		tableRow = $('<tr/>').appendTo(table);
 		$('<th>' + type + '</th>').appendTo(tableRow);
 
 		response.rows[0].elements.forEach(function(element) {
 			$('<td>' + element.duration.text + '</td>').appendTo(tableRow);
 		});
+	}
+}
+
+function getBusDirectionsCallBack(destinations, table) {
+	return function(response, status) {
+		if (status != google.maps.DirectionsStatus.OK)
+			return false;
+
+		busTableRow = $('<tr/>').appendTo(table);
+		$('<th>Bus</th>').appendTo(busTableRow);
+
+		rows = destinations.length;
+		busDuration = response.routes[0].legs[0].duration.text;
+		$('<td>' + busDuration + '</td>').appendTo(busTableRow);
+		for (var i = 1; i < destinations.length; i++) {
+			$('<td/>').appendTo(busTableRow);
+		}
 	}
 }
 
@@ -76,10 +94,10 @@ else if (typeof drawMapDetails == 'function') {
 		var houseLocation = new google.maps.LatLng(latitude, longitude);
 		var distanceMatrixService = new google.maps.DistanceMatrixService();
 		var destinations = [
-			"St Paul's and St George's Church, Edinburgh",
 			"Princes Street, Edinburgh",
+			"St Paul's and St George's Church, Edinburgh",
 			"Royal Infirmary of Edinburgh",
-			"Tollcross Health Centre, Edinburgh"
+			"Tollcross Health Centre, Edinburgh",
 		];
 
 		var table = createDistanceMatrixTable(destinations);
@@ -95,6 +113,18 @@ else if (typeof drawMapDetails == 'function') {
 		var distanceMatrixBikeOptions = jQuery.extend({}, distanceMatrixCarOptions);
 		distanceMatrixBikeOptions.travelMode = google.maps.TravelMode.BICYCLING;
 		distanceMatrixService.getDistanceMatrix(distanceMatrixBikeOptions, getDistanceMatrixCallBack('Bike', table));
+
+		var directionsService = new google.maps.DirectionsService();
+		var departureTime = new Date(2013, 3, 15, 7, 30);
+		var directionsBusOptions = {
+			origin: houseLocation,
+			destination: destinations[0],
+			travelMode: google.maps.TravelMode.TRANSIT,
+			transitOptions: {
+				departureTime: departureTime,
+			}
+		};
+		directionsService.route(directionsBusOptions, getBusDirectionsCallBack(destinations, table));
 	}, 1000);
 }
 else {
