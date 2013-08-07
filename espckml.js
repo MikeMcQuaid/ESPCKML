@@ -1,14 +1,21 @@
 // "Compile" with http://chris.zarate.org/bookmarkleter
+var KML_URL = 'https://maps.google.com/maps/ms?msa=0&output=kml&msid=217694540754022493585.0004d551e620a2b06ec95';
+var DESTINATIONS = [
+	"Princes Street, Edinburgh",
+	"St Paul's and St George's Church, Edinburgh",
+	"Royal Infirmary of Edinburgh",
+	"Tollcross Health Centre, Edinburgh",
+];
+
 var rowCount = 0;
 
 function enhanceMap(map) {
-	var kmlUrl = 'https://maps.google.com/maps/ms?msa=0&output=kml&msid=217694540754022493585.0004d551e620a2b06ec95';
 	var kmlLayer = new google.maps.KmlLayer({
 		clickable: false,
 		map: map,
 		preserveViewport: true,
 		suppressInfoWindows: true,
-		url: kmlUrl,
+		url: KML_URL,
 	});
 	window.map = map;
 }
@@ -93,18 +100,12 @@ else if (typeof drawMapDetails == 'function') {
 		enhanceMap(map);
 		var houseLocation = new google.maps.LatLng(latitude, longitude);
 		var distanceMatrixService = new google.maps.DistanceMatrixService();
-		var destinations = [
-			"Princes Street, Edinburgh",
-			"St Paul's and St George's Church, Edinburgh",
-			"Royal Infirmary of Edinburgh",
-			"Tollcross Health Centre, Edinburgh",
-		];
 
-		var table = createDistanceMatrixTable(destinations);
+		var table = createDistanceMatrixTable(DESTINATIONS);
 
 		var distanceMatrixCarOptions = {
 			origins: [houseLocation],
-			destinations: destinations,
+			destinations: DESTINATIONS,
 			unitSystem: google.maps.UnitSystem.IMPERIAL,
 			travelMode: google.maps.TravelMode.DRIVING,
 		};
@@ -118,13 +119,13 @@ else if (typeof drawMapDetails == 'function') {
 		var departureTime = new Date(2013, 3, 15, 7, 30);
 		var directionsBusOptions = {
 			origin: houseLocation,
-			destination: destinations[0],
+			destination: DESTINATIONS[0],
 			travelMode: google.maps.TravelMode.TRANSIT,
 			transitOptions: {
 				departureTime: departureTime,
 			}
 		};
-		directionsService.route(directionsBusOptions, getBusDirectionsCallBack(destinations, table));
+		directionsService.route(directionsBusOptions, getBusDirectionsCallBack(DESTINATIONS, table));
 	}, 1000);
 }
 else {
