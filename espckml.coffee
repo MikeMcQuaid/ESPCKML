@@ -4,7 +4,7 @@ DESTINATIONS = [
   "Princes Street, Edinburgh",
   "St Paul's and St George's Church, Edinburgh",
   "Royal Infirmary of Edinburgh",
-  "Tollcross Health Centre, Edinburgh"
+  'Virgin Active - Fountain Park, Edinburgh'
 ]
 
 rowCount = 0
